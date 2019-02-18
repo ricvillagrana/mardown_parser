@@ -10,6 +10,7 @@ module MarkdownParser
 
   def self.markdown_to_html(text)
     lines = text.split("\n")
+    lines << ''
     lines.map do |line|
       apply_rules(line)
     end.join
