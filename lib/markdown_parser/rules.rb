@@ -18,7 +18,7 @@ module MarkdownParser
 
       before_parse :ensure_to_close_list, line
 
-      return line if @state[:code_tag_opened] and !line.match(/^```$/)
+      return "#{line}\n" if @state[:code_tag_opened] and !line.match(/^```$/)
 
       case line
       when /^#+\s/ # titles
@@ -34,7 +34,7 @@ module MarkdownParser
       when /^(-|\*|\+|\d+)\s.+/ # list item
         apply_list(line)
       else
-        line.empty? ? line : "<p>#{line}</p>"
+        line.empty? ? line : "#{line}"
       end
     end
 
@@ -46,7 +46,7 @@ module MarkdownParser
       # `code`
       line.gsub!(/`(?<word>[^`]*)`/, "<code>\\k<word></code>")
       # [alt message](image_url)
-      line.gsub!(/!\[(?<alt>[^\]]*)\]\((?<link>[^\)]*)\)/, '<img src="\k<link>" alt="\k<alt>" \>')
+      line.gsub!(/!\[(?<alt>[^\]]*)\]\((?<link>[^\)]*)\)/, '<img src="\k<link>" alt="\k<alt>" />')
       # [text](limk)
       line.gsub!(/\[(?<text>[^\]]*)\]\((?<link>[^\)]*)\)/, '<a href="\k<link>">\k<text></a>')
 
@@ -62,7 +62,7 @@ module MarkdownParser
 
     # blockquote method
     def self.apply_blockquote(line)
-      "<p><blockqouote>#{line}</blockqoute></p>"
+      "<p><blockquote>#{line[2..-1]}</blockquote></p>"
     end
 
     # multi-line code method
@@ -74,8 +74,8 @@ module MarkdownParser
 
     # list item method, also add ul tag when is the first to be added
     def self.apply_list(line)
-      line = "\t<li>#{line[2..-1]}</li>"
-      line = "<ul>\n" + line unless @state[:last_was_list]
+      line = "<li>#{line[2..-1]}</li>"
+      line = "<ul>" + line unless @state[:last_was_list]
       toggle(:list_opened)
       @state[:last_was_list] = true
       line
@@ -107,7 +107,7 @@ module MarkdownParser
     def self.ensure_to_close_list(line)
       if @state[:last_was_list] && !['- ', '+ ', '* '].include?(line[0,2])
         @state[:last_was_list] = false
-        @state[:to_append] = "</ul>\n"
+        @state[:to_append] = "</ul>"
       end
     end
   end

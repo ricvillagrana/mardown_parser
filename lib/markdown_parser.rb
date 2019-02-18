@@ -5,7 +5,7 @@ module MarkdownParser
 
   def self.parse(plain_text)
     text = EscapeUtils.escape_html(plain_text)
-    "<div class='markdown-parser'>\n#{markdown_to_html(text)}\n</div>"
+    "<div class='markdown-parser'>#{markdown_to_html(text)}</div>"
   end
 
   def self.markdown_to_html(text)
@@ -17,6 +17,6 @@ module MarkdownParser
   end
 
   def self.apply_rules(line)
-    Rules.apply(line) + "\n"
+    Rules.apply(line)
   end
 end
