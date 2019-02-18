@@ -28,11 +28,9 @@ module MarkdownParser
       when /^(---|___|\*\*\*)\s*$/
         "<hr />"
       when /^>\s.+$/
-        "<blockqouote><p>#{line}</p></blockqoute>"
+        apply_blockquote(line)
       when /^```.*/
-        line = @state[:code_tag_opened] ? "</code></pre>" : "<pre><code>"
-        toggle(:code_tag_opened)
-        line
+        apply_code(line)
       when /^(-|\*|\+|\d+)\s.+/
         apply_list(line)
       else
@@ -52,11 +50,18 @@ module MarkdownParser
 
     def self.apply_header(line)
       depth = title_depth(line)
-      if depth > 0
-        line.gsub(eval("/^#{'#' * depth}\s/"), "<h#{depth}>").gsub(/$/, "</h#{depth}>")
-      else
-        line
-      end
+      return line if depth > 0
+      line.gsub(eval("/^#{'#' * depth}\s/"), "<h#{depth}>").gsub(/$/, "</h#{depth}>")
+    end
+
+    def self.apply_blockquote(line)
+      "<p><blockqouote>#{line}</blockqoute></p>"
+    end
+
+    def self.apply_code(line)
+      line = @state[:code_tag_opened] ? "</code></pre>" : "<pre><code>"
+      toggle(:code_tag_opened)
+      line
     end
 
     def self.apply_list(line)
