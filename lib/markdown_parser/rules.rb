@@ -18,6 +18,8 @@ module MarkdownParser
 
       before_parse :ensure_to_close_list, line
 
+      return line if @state[:code_tag_opened] and !line.match(/^```$/)
+
       case line
       when /^#+\s/
         apply_header(line)
@@ -27,38 +29,25 @@ module MarkdownParser
         "<hr />"
       when /^>\s.+$/
         "<blockqouote><p>#{line}</p></blockqoute>"
-      when /\[.+\]\(https?:\/\/.+\)/
-        apply_link(line)
-      when /^```$/
+      when /^```.*/
         line = @state[:code_tag_opened] ? "</code></pre>" : "<pre><code>"
         toggle(:code_tag_opened)
-        line
-      when /^```$/
-        "<code><pre>"
-      when /```(ruby|javascript|php)/
-        line = @state[:code_tag_hl_opened] ? "</code></pre>" : "<pre><code>"
-        toggle(:code_tag_hl_opened)
         line
       when /^(-|\*|\+|\d+)\s.+/
         apply_list(line)
       else
-        line
+        line.empty? ? line : "<p>#{line}</p>"
       end
     end
 
     def self.apply_inline_style(line)
-      to_return = case line
-      when /\*\*.+\*\*/
-        "<p><strong>#{line[2..-3]}</strong></p>"
-      when /\_.+\_/
-        "<p><em>#{line[1..-2]}</em></p>"
-       when /`/
-        "<code>#{line}</code>"
-      else
-        line
-      end
+      line.gsub!(/\*\*(?<word>[^\*]*)\*\*/, "<strong>\\k<word></strong>")
+      line.gsub!(/\_(?<word>[^_]*)\_/, "<em>\\k<word></em>")
+      line.gsub!(/`(?<word>[^`]*)`/, "<code>\\k<word></code>")
+      line.gsub!(/!\[(?<alt>[^\]]*)\]\((?<link>[^\)]*)\)/, '<img src="\k<link>" alt="\k<alt>" \>')
+      line.gsub!(/\[(?<text>[^\]]*)\]\((?<link>[^\)]*)\)/, '<a href="\k<link>">\k<text></a>')
 
-      append_queue to_return
+      append_queue line
     end
 
     def self.apply_header(line)
@@ -76,12 +65,6 @@ module MarkdownParser
       toggle(:list_opened)
       @state[:last_was_list] = true
       line
-    end
-
-    def self.apply_link(line)
-      text = /\[.+\]/.match(line).to_s[1..-2]
-      link = /\(.+\)/.match(line).to_s[1..-2]
-      "<p><a href='#{link}'>#{text}</a></p>"
     end
 
     def self.toggle(symbol)
