@@ -56,7 +56,7 @@ module MarkdownParser
     # haeder method
     def self.apply_header(line)
       depth = title_depth(line)
-      return line if depth > 0
+      return line if depth == 0
       line.gsub(eval("/^#{'#' * depth}\s/"), "<h#{depth}>").gsub(/$/, "</h#{depth}>")
     end
 
