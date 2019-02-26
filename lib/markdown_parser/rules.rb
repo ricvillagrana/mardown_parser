@@ -15,70 +15,14 @@ module MarkdownParser
 
     def self.apply_line(line)
       line = EscapeUtils.unescape_html(line)
-
       before_parse :ensure_to_close_list, line
-
-      return "#{line}\n" if @state[:code_tag_opened] and !line.match(/^```$/)
-
-      case line
-      when /^#+\s/ # titles
-        apply_header(line)
-      when /^(------|======)\s*$/ # alternative titles
-        apply_header(line)
-      when /^(---|___|\*\*\*)\s*$/ # line separator
-        "<hr />"
-      when /^>\s.+$/ # blockqoutes
-        apply_blockquote(line)
-      when /^```.*/ # code
-        apply_code(line)
-      when /^(-|\*|\+|\d+)\s.+/ # list item
-        apply_list(line)
-      else
-        line.empty? ? line : "#{line}"
-      end
+      MarkdownParser::LineStyle.apply(line)
     end
 
     def self.apply_inline_style(line)
-      # **strong**
-      line.gsub!(/\*\*(?<word>[^\*]*)\*\*/, "<strong>\\k<word></strong>")
-      # _em_
-      line.gsub!(/\_(?<word>[^_]*)\_/, "<em>\\k<word></em>")
-      # `code`
-      line.gsub!(/`(?<word>[^`]*)`/, "<code>\\k<word></code>")
-      # [alt message](image_url)
-      line.gsub!(/!\[(?<alt>[^\]]*)\]\((?<link>[^\)]*)\)/, '<img src="\k<link>" alt="\k<alt>" />')
-      # [text](limk)
-      line.gsub!(/\[(?<text>[^\]]*)\]\((?<link>[^\)]*)\)/, '<a href="\k<link>">\k<text></a>')
-
+      MarkdownParser::InlineStyle.apply(line) 
+      # this line adds the last enqueued string for closing tags, like </ul>
       append_queue line
-    end
-
-    # haeder method
-    def self.apply_header(line)
-      depth = title_depth(line)
-      return line if depth == 0
-      line.gsub(eval("/^#{'#' * depth}\s/"), "<h#{depth}>").gsub(/$/, "</h#{depth}>")
-    end
-
-    # blockquote method
-    def self.apply_blockquote(line)
-      "<p><blockquote>#{line[2..-1]}</blockquote></p>"
-    end
-
-    # multi-line code method
-    def self.apply_code(line)
-      line = @state[:code_tag_opened] ? "</code></pre>" : "<pre><code>"
-      toggle(:code_tag_opened)
-      line
-    end
-
-    # list item method, also add ul tag when is the first to be added
-    def self.apply_list(line)
-      line = "<li>#{line[2..-1]}</li>"
-      line = "<ul>" + line unless @state[:last_was_list]
-      toggle(:list_opened)
-      @state[:last_was_list] = true
-      line
     end
 
     # toggle boolean variables
@@ -86,15 +30,14 @@ module MarkdownParser
       @state[symbol] = !@state[symbol]
     end
 
-    # define how many #'s a string has'
-    def self.title_depth(str)
-      str.match(/^#+\s*/).to_s.size - 1
+    # set the new value to index of symbol in @state
+    def self.set(symbol, value)
+      @state[symbol] = value
     end
 
     # adds at the beginning of the line the string in the @state[:to_append]
     def self.append_queue(line)
-      to_append = @state[:to_append]
-      @state[:to_append] = nil
+      to_append, @state[:to_append] = @state[:to_append], nil
       to_append.nil? ? line : to_append + line
     end
 
@@ -110,5 +53,10 @@ module MarkdownParser
         @state[:to_append] = "</ul>"
       end
     end
+
+    def self.state
+      @state
+    end
+
   end
 end

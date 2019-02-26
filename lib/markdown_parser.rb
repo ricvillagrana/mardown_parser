@@ -2,6 +2,8 @@ module MarkdownParser
   require 'escape_utils'
 
   require_relative './markdown_parser/rules'
+  require_relative './markdown_parser/inline_style'
+  require_relative './markdown_parser/line_style'
 
   def self.parse(plain_text)
     text = EscapeUtils.escape_html(plain_text)
