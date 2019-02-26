@@ -10,7 +10,6 @@ module MarkdownParser
       return apply_list(line) if line.match(/^(-|\*|\+|\d+)\s.+/)
 
       line.empty? ? line : "<p>#{line}</p>"
-
     end
 
     # haeder method
