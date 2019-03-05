@@ -10,12 +10,12 @@ module MarkdownParser
 
     def self.apply_bold(line)
       # **strong**
-      line.gsub!(/\*\*(?<word>[^\*]*)\*\*/, "<strong>\\k<word></strong>")
+      line.gsub!(/(^|\s+)\*\*(?<word>[^\*]*)\*\*($|\s+)/, "<strong>\\k<word></strong>")
     end
 
     def self.apply_italics(line)
       # _em_
-      line.gsub!(/\_(?<word>[^_]*)\_/, "<em>\\k<word></em>")
+      line.gsub!(/(^|\s+)\_(?<word>[^_]*)\_($|\s+)/, "<em>\\k<word></em>")
     end
 
     def self.apply_code(line)
