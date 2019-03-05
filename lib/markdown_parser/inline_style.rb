@@ -20,7 +20,7 @@ module MarkdownParser
 
     def self.apply_code(line)
       # `code`
-      line.gsub!(/`(?<word>[^`]*)`/, "<code>\\k<word></code>")
+      line.gsub!(/`{1}(?<word>[^`]*)`{1}/, "<code>\\k<word></code>")
     end
 
     def self.apply_image(line)

@@ -31,7 +31,8 @@ module MarkdownParser
 
     # multi-line code method
     def self.apply_code(line)
-      line = MarkdownParser::Rules.state[:code_tag_opened] ? "</code></pre>" : "<pre><code>"
+      lang = line.size > 3 ? line[3..-1] : ''
+      line = MarkdownParser::Rules.state[:code_tag_opened] ? "</code>" : "<code class='prettyprint #{lang}'>"
       MarkdownParser::Rules.toggle(:code_tag_opened)
       line
     end
