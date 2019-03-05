@@ -4,8 +4,8 @@ module MarkdownParser
       apply_bold(line)
       apply_italics(line)
       apply_code(line)
-      apply_link(line)
       apply_image(line)
+      apply_link(line)
     end
 
     def self.apply_bold(line)
