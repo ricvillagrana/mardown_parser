@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'markdown_parser'
-  s.version     = '0.1.0.alpha3'
+  s.version     = '0.1.0.alpha4'
   s.date        = '2019-03-05'
   s.summary     = 'Parses markdown to html'
   s.description = "A gem that parses your markdown to html"

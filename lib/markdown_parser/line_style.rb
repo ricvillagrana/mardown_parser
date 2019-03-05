@@ -32,7 +32,7 @@ module MarkdownParser
     # multi-line code method
     def self.apply_code(line)
       lang = line.size > 3 ? line[3..-1] : ''
-      line = MarkdownParser::Rules.state[:code_tag_opened] ? "</code>" : "<code class='prettyprint #{lang}'>"
+      line = MarkdownParser::Rules.state[:code_tag_opened] ? "</pre>" : "<pre class='prettyprint #{lang}'>"
       MarkdownParser::Rules.toggle(:code_tag_opened)
       line
     end
