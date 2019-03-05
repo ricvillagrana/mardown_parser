@@ -5,7 +5,7 @@ module MarkdownParser
       apply_italics(line)
       apply_code(line)
       apply_link(line)
-      apply_img(line)
+      apply_image(line)
     end
 
     def self.apply_bold(line)
@@ -23,14 +23,14 @@ module MarkdownParser
       line.gsub!(/`(?<word>[^`]*)`/, "<code>\\k<word></code>")
     end
 
-    def self.apply_link(line)
+    def self.apply_image(line)
       # [alt message](image_url)
       line.gsub!(/!\[(?<alt>[^\]]*)\]\((?<link>[^\)]*)\)/, "<img src='\\k<link>' alt='\\k<alt>' />")
     end
 
-    def self.apply_img(line)
+    def self.apply_link(line)
       # [text](limk)
-      line.gsub!(/\[(?<text>[^\]]*)\]\((?<link>[^\)]*)\)/, "<a href='\\k<link>'>\\k<text></a>")
+      line.gsub!(/\[(?<text>[^\]]*)\]\((?<link>[^\)]*)\)/, "<a href='\\k<link>' target='_blank'>\\k<text></a>")
     end
     
   end
